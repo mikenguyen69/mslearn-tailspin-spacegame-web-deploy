@@ -66,30 +66,30 @@ stages:
       artifact: drop
 
 - job: BuildDacpac
-  pool: 
+  pool:
     vmImage: 'windows-2019'
   steps:
   - task: DotNetCoreCLI@2
     displayName: 'Restore project dependencies'
-    inputs: 
+    inputs:
       command: 'restore'
       projects: '**/*.csproj'
-  
+
   - task: VSBuild@1
     displayName: 'Build the database project'
     inputs:
       project: '**/*.sqlproj'
-  
+
   - task: CopyFiles@2
     displayName: 'Copy dacpac file to staging directory'
-    inputs: 
+    inputs:
       contents: |
         Tailspin.SpaceGame.Database/bin/**/*.dacpac
       targetFolder: '$(Build.StagingDirectory)'
-  
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact'
-    inputs: 
+    inputs:
       pathToPublish: '$(Build.ArtifactStagingDirectory)'
       artifactName: dropDacpac
     condition: succeededOrFailed()
@@ -132,7 +132,7 @@ stages:
                 Write-Host "Auto Generated SQL Update Script:"
                 Get-Content d:\a\1\s\GeneratedOutputFiles\$(databasename)_Script.sql | foreach {Write-Output $_}
 
-  - stage: DBAVerificationApply
+- stage: DBAVerificationApply
   displayName: 'Apply database schema changes'
   dependsOn: DBAVerificationScript
   jobs:
@@ -162,7 +162,6 @@ stages:
               deploymentAction: 'Publish'
               dacpacFile: '$(Pipeline.Workspace)/dropDacpac/Tailspin.SpaceGame.Database/bin/Debug/Tailspin.SpaceGame.Database.dacpac'
               ipDetectionMethod: 'AutoDetect'
-
 
 - stage: 'Dev'
   displayName: 'Deploy to the dev environment'
